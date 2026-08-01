@@ -1,3 +1,22 @@
+void drawToggleAutoCalib() {
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setTextColor(SH110X_WHITE);
+  display.setCursor(0, 0);
+  display.println("AUTO CALIB");
+  display.drawLine(0, 10, 128, 10, SH110X_WHITE);
+  display.setTextSize(3);
+  display.setCursor(20, 25);
+  display.print(autoCalibEnabled ? "ON" : "OFF");
+  display.setTextSize(1);
+  display.setCursor(5, 54);
+  if (autoCalibEnabled) {
+    display.print("Calibra a ogni avvio");
+  } else {
+    display.print("Level fisso: " + String(Level));
+  }
+  display.display();
+}
 // === DISPLAY FUNCTIONS ===
 void drawMainMenu() {
   display.clearDisplay();
@@ -256,7 +275,7 @@ void drawDelay() {
   display.setTextColor(SH110X_WHITE);
   
   display.setCursor(0, 0);
-  display.println("DELAY");
+  display.println("DELAY step:"+String(DELAY_STEP));
   display.drawLine(0, 10, 128, 10, SH110X_WHITE);
   
   display.setTextSize(2);
@@ -402,6 +421,87 @@ void drawPresetScreen() {
   
 }
 
+/*void drawToggleLoudness() {
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setTextColor(SH110X_WHITE);
+  display.setCursor(0, 0);
+  display.println("LOUDNESS");
+  display.drawLine(0, 10, 128, 10, SH110X_WHITE);
+  display.setTextSize(3);
+  display.setCursor(20, 25);
+  display.print(loudnessEnabled ? "ON" : "OFF");
+  display.display();
+}*/
+void drawToggleLoudness() {
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setTextColor(SH110X_WHITE);
+  display.setCursor(0, 0);
+  display.println("LOUDNESS");
+  display.drawLine(0, 10, 128, 10, SH110X_WHITE);
+  display.setTextSize(3);
+  display.setCursor(20, 25);
+  display.print(loudnessEnabled ? "ON" : "OFF");
+  display.display();
+}
+
+void drawEditLoudnessGain() {
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setTextColor(SH110X_WHITE);
+  display.setCursor(0, 0);
+  display.println("LOUDNESS GAIN");
+  display.drawLine(0, 10, 128, 10, SH110X_WHITE);
+  display.setTextSize(2);
+  display.setCursor(10, 20);
+  display.print(loudnessGainDB, 1);
+  display.setTextSize(1);
+  display.print(" dB");
+  int barWidth = (int)((loudnessGainDB / LOUDNESS_GAIN_MAX) * 110);
+  display.drawRect(5, 42, 118, 10, SH110X_WHITE);
+  display.fillRect(6, 43, barWidth, 8, SH110X_WHITE);
+  display.setCursor(5, 54);
+  display.print(loudnessEnabled ? "Active" : "Enable in Loudness menu");
+  display.display();
+}
+
+void drawEditLoudnessFreq() {
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setTextColor(SH110X_WHITE);
+  display.setCursor(0, 0);
+  display.println("LOUDNESS BASS FREQ");
+  display.drawLine(0, 10, 128, 10, SH110X_WHITE);
+  display.setTextSize(2);
+  display.setCursor(10, 20);
+  display.print((int)loudnessFreq);
+  display.setTextSize(1);
+  display.print(" Hz");
+  int barWidth = (int)(((loudnessFreq - LOUDNESS_FREQ_MIN) / (LOUDNESS_FREQ_MAX - LOUDNESS_FREQ_MIN)) * 110);
+  display.drawRect(5, 42, 118, 10, SH110X_WHITE);
+  display.fillRect(6, 43, barWidth, 8, SH110X_WHITE);
+  display.display();
+}
+
+void drawEditLoudnessHighFreq() {
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setTextColor(SH110X_WHITE);
+  display.setCursor(0, 0);
+  display.println("LOUDNESS TREBLE FREQ");
+  display.drawLine(0, 10, 128, 10, SH110X_WHITE);
+  display.setTextSize(2);
+  display.setCursor(10, 20);
+  display.print((int)loudnessHighFreq);
+  display.setTextSize(1);
+  display.print(" Hz");
+  int barWidth = (int)(((loudnessHighFreq - LOUDNESS_HIGH_FREQ_MIN) / (LOUDNESS_HIGH_FREQ_MAX - LOUDNESS_HIGH_FREQ_MIN)) * 110);
+  display.drawRect(5, 42, 118, 10, SH110X_WHITE);
+  display.fillRect(6, 43, barWidth, 8, SH110X_WHITE);
+  display.display();
+}
+
 void updateDisplay() {
   switch (currentMenu) {
     case MENU_MAIN:{
@@ -463,6 +563,26 @@ void updateDisplay() {
     case MENU_STATS:{
       drawStats();
       break;
+    }
+    case MENU_TOGGLE_LOUDNESS:{ 
+      drawToggleLoudness(); 
+      break; 
+    }
+    case MENU_EDIT_LOUDNESS_GAIN:{ 
+      drawEditLoudnessGain(); 
+      break; 
+    }
+    case MENU_EDIT_LOUDNESS_FREQ:{ 
+      drawEditLoudnessFreq(); 
+      break; 
+    }
+    case MENU_EDIT_LOUDNESS_HIGHFREQ:{ 
+      drawEditLoudnessHighFreq();
+      break; 
+    }
+    case MENU_TOGGLE_AUTOCALIB:{ 
+      drawToggleAutoCalib(); 
+      break; 
     }  
   }
 }

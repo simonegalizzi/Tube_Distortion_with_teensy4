@@ -63,7 +63,7 @@ bool autoCalibrateLiveInputSafe() {
     display.display();
     delay(1000);
     
-    audioShield.lineInLevel(8);
+    audioShield.lineInLevel(5);
     inputGainL.gain(0, 1.0f);
     inputGainR.gain(0, 1.0f);
     return true;
@@ -76,12 +76,12 @@ bool autoCalibrateLiveInputSafe() {
   if (campioni < 10) {
     display.clearDisplay();
     display.setCursor(0, 15);
-    display.println("Signal too weak");
+    display.println("Signale debole");
     display.setCursor(0, 30);
-    display.println("Using level 8");
+    display.println("Using level 5");
     display.display();
-    Level = 8;
-    audioShield.lineInLevel(8);
+    Level = 5;
+    audioShield.lineInLevel(5);
     inputGainL.gain(0, 1.0f);
     inputGainR.gain(0, 1.0f);
     return true;
@@ -206,16 +206,8 @@ bool autoCalibrateLiveInputSafe() {
   
   display.display();
 
-  // === SETUP MIXER FINALE ===
-  inputGainL.gain(0, 1.0f);
-  inputGainR.gain(0, 1.0f);
-  mixerL.gain(0, baseOutputVolume);  // Distortion
-  mixerL.gain(1, 0.0);  // Delay chain (ha già il dry!)
 
-
-  mixerR.gain(0, baseOutputVolume);
-  mixerR.gain(1, 0.0);
-  
+  saveAllPresets();
   return true;   //signal correct
  }else{
   return false;
@@ -495,6 +487,26 @@ void updateBypass() {
   }
 }
 
+/*void updateLoudness() {
+  float gain = loudnessEnabled ? LOUDNESS_GAIN_DB : 0.0f;
+  postFilterL.setLowShelf(1, LOUDNESS_FREQ, gain, 0.7);
+  postFilterR.setLowShelf(1, LOUDNESS_FREQ, gain, 0.7);
+}*/
+void updateLoudness() {
+  float bassGain = loudnessEnabled ? loudnessGainDB : 0.0f;
+  float trebleGain = loudnessEnabled ? (loudnessGainDB * LOUDNESS_TREBLE_RATIO) : 0.0f;
+
+  postFilterL.setLowShelf(1, loudnessFreq, bassGain, 1.0);
+  postFilterR.setLowShelf(1, loudnessFreq, bassGain, 1.0);
+  postFilterL.setHighShelf(2, loudnessHighFreq, trebleGain, 1.0);
+  postFilterR.setHighShelf(2, loudnessHighFreq, trebleGain, 1.0);
+
+  loudnessFilterL.setLowShelf(0, loudnessFreq, bassGain, 1.0);
+  loudnessFilterR.setLowShelf(0, loudnessFreq, bassGain, 1.0);
+  loudnessFilterL.setHighShelf(1, loudnessHighFreq, trebleGain, 1.0);
+  loudnessFilterR.setHighShelf(1, loudnessHighFreq, trebleGain, 1.0);
+}
+  
 // === GENERAZIONE WAVESHAPE CON CHEBYSHEV ===
 void generateChebyshevWaveshape()
 {

@@ -103,13 +103,14 @@ bool saveAllPresets() {
     //"Errore: impossibile aprire file preset"
     return false;
   }
-  
+
   storage.magic = FLASH_MAGIC;
   storage.currentPreset = activePreset;
-  
+  storage.autoCalibEnabled = autoCalibEnabled;
+  storage.savedLineLevel = Level; 
   file.write(&storage, sizeof(PresetStorage));
   file.close();
-  
+
   //"Preset salvati nella flash"
   return true;
 }
@@ -124,7 +125,7 @@ bool loadAllPresets() {
   
   SerialFlashFile file = SerialFlash.open(PRESET_FILE);
   if (!file) {
-    //"Errore apertura file preset"
+   // Serial.println("Errore apertura file preset");
     return false;
   }
   
@@ -138,18 +139,31 @@ bool loadAllPresets() {
   }
  
   activePreset = 0;
+  
+ // printf(storage.autoCalibEnabled, "calib %d");
+//  Serial.println("autocalib "+String(autoCalibEnabled));
   //"Preset caricati dalla flash"
   return true;
+}
+
+
+void saveAutoCalibSetting() { //salvataggio calib on off
+  storage.autoCalibEnabled = autoCalibEnabled;
+ // Serial.println("salvato");
+ // Serial.println("autocalib "+String(autoCalibEnabled));
+  saveAllPresets();
 }
 
 // Inizializza i preset con valori di default
 void initializePresets() {
   storage.magic = FLASH_MAGIC;
   storage.currentPreset = 0;
-  
+  storage.autoCalibEnabled = false; 
+  storage.savedLineLevel = 1;
+ // sprintf(storage.autoCalibEnabled, "calib %d");
   for (int i = 1; i < MAX_PRESETS; i++) {
     storage.presets[i].active = false;
-    //sprintf(storage.presets[i].name, "Preset %d", i + 1);
+    sprintf(storage.presets[i].name, "Preset %d", i + 1);
     storage.presets[i].record.activ = false;
     storage.presets[i].record.drive_Mount = 0.0f;
     storage.presets[i].record.wet_Amount = 0.0f;
@@ -320,9 +334,9 @@ void showPresetDetails(int index) {
 MeasurementRecord getCurrentPreset() {
   return storage.presets[activePreset].record;
 }
-
-/*void erase_flash_log() {
-  if (!flash_available) return;
+/*
+void erase_flash_log() {
+  if (!SerialFlash_available) return;
   SerialFlash.remove(PRESET_FILE);
   flash_record_count = 0;
   //Serial.println("Log cancellato");
