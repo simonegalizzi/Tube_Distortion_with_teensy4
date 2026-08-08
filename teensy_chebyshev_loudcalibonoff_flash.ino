@@ -195,6 +195,26 @@ const int DELAY_MIN = 0;
 const int DELAY_MAX = 46000;   // ms (sicuro per extmem)
 int DELAY_STEP = 10;   // passo encoder
 
+// Fattori di normalizzazione per equalizzare l'aggressivita' tra preset
+// (calcolati dalla norma L2 degli alpha di ciascun preset, riferiti a Clean)
+const float presetGainNorm[16] = {
+  0.13108f, // TUBE
+  0.12250f, // TRANSISTOR
+  0.05719f, // FUZZ
+  1.00000f, // CLEAN
+  0.13243f, // CUSTOM
+  0.11075f, // OVERDRIVE
+  0.05883f, // DISTORTION
+  0.13829f, // BLUES
+  0.04552f, // METAL
+  0.09252f, // WARM_TUBE
+  0.10179f, // CRUNCH
+  0.07377f, // BRIGHT
+  0.06916f, // DARK
+  0.06694f, // OCTAVE
+  0.22261f, // SOFT_CLIP
+  0.03354f  // HARD_CLIP
+};
 // === PRESETS ARMONICHE ===
 enum HarmonicPreset {
   PRESET_TUBE,
@@ -334,9 +354,13 @@ void shutdownAudio() {
 
 
 void setupFilters() {
-  preFilterL.setHighpass(0, 40, 0.5);
+  /*preFilterL.setHighpass(0, 40, 0.5);
   preFilterR.setHighpass(0, 40, 0.5);
   postFilterL.setLowpass(0, toneFreq, 0.5);
+  postFilterR.setLowpass(0, toneFreq, 0.5);*/
+  preFilterL.setHighpass(0, 20, 0.707);   // era 40 Hz → praticamente disattivato
+  preFilterR.setHighpass(0, 20, 0.707);
+  postFilterL.setLowpass(0, toneFreq, 0.5); // era toneFreq → praticamente disattivato
   postFilterR.setLowpass(0, toneFreq, 0.5);
 }
 
@@ -363,9 +387,15 @@ void handleEncoder() {
         break;
       }  
       case MENU_EDIT_DRIVE:{
-        driveAmount += delta * 0.05f;
+        /*driveAmount += delta * 0.05f;
         if (driveAmount < 0.05f) driveAmount = 0.05f;
         if (driveAmount > 5.0f) driveAmount = 5.0f;
+        needWaveshapeRegen = true;
+        if (autoVolumeCompensation) updateOutputVolume();
+        break;*/
+        driveAmount += delta * 0.01f;      // step da 0.05 a 0.01 → 5x piu' risoluzione
+        if (driveAmount < 0.01f) driveAmount = 0.01f;
+        if (driveAmount > 0.55f) driveAmount = 0.55f;   // era 5.0f
         needWaveshapeRegen = true;
         if (autoVolumeCompensation) updateOutputVolume();
         break;
@@ -878,7 +908,7 @@ void loop() {
   handleEncoder();
   handleButtons();
   if (Adjust_Level == false) {
-  if ((needWaveshapeRegen && millis() - lastWaveshapeCheck > 50)&&(calib_finish)&&(bypassEnabled==false)) {
+  if ((needWaveshapeRegen && millis() - lastWaveshapeCheck > 200)&&(calib_finish)&&(bypassEnabled==false)) {
     lastWaveshapeCheck = millis();
     needWaveshapeRegen = false;
     //Serial.println("Regenerating waveshape...");

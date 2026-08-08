@@ -222,8 +222,8 @@ void loadPreset(HarmonicPreset preset) {
    
   switch(preset) {
     case PRESET_TUBE:
-      alpha[0] = 0.8f;
-      alpha[1] = 1.5f;
+      alpha[0] = 1.0f;
+      alpha[1] = 0.4f;
       alpha[2] = 0.3f;
       alpha[3] = 0.8f;
       alpha[4] = 0.1f;
@@ -509,7 +509,14 @@ void updateLoudness() {
   
 // === GENERAZIONE WAVESHAPE CON CHEBYSHEV ===
 void generateChebyshevWaveshape()
-{
+{/*// === TEST TEMPORANEO: LUT lineare pura, nessuna distorsione ===
+  for (int i = 0; i < WS_SIZE; i++) {
+    float x = 2.0f * (float)i / (WS_SIZE - 1) - 1.0f;
+    waveshape[i] = x;
+  }
+  waveshaperL.shape(waveshape, WS_SIZE);
+  waveshaperR.shape(waveshape, WS_SIZE);
+  return; // <-- salta tutto il resto della funzione (il calcolo Chebyshev)*/
  const float invSize = 2.0f / (WS_SIZE - 1);
 
 
@@ -523,9 +530,11 @@ void generateChebyshevWaveshape()
     }
 
     // Ordini superiori
-    const int maxOrder = min(MAX_ORDER, (int)(sizeof(alpha) / sizeof(float)) + 1);
-float drive = driveAmount;
-for (int k = 2; k <= maxOrder; k++) {
+   // const int maxOrder = min(MAX_ORDER, (int)(sizeof(alpha) / sizeof(float)) + 1);
+//float drive = driveAmount;
+const int maxOrder = min(MAX_ORDER, (int)(sizeof(alpha) / sizeof(float)) + 1);
+float drive = driveAmount * presetGainNorm[currentPreset];   // <-- modificato
+for (int k = 2; k <= maxOrder; k++) { //maxOrder
 
     for (int i = 0; i < WS_SIZE; i++) {
         float x = i * invSize - 1.0f;
