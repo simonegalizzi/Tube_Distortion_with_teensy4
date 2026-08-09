@@ -374,7 +374,7 @@ void handleEncoder() {
   long newPos = rotaryEncoder.read() / 4;
   
   if (newPos != lastEncoderPos) {
-    int delta = newPos - lastEncoderPos;
+    int delta = -(newPos - lastEncoderPos);
     lastEncoderPos = newPos;
 
     switch (currentMenu) {
@@ -720,6 +720,7 @@ void setup() {
   /* if (SerialFlash.exists(PRESET_FILE)) {
     SerialFlash.remove(PRESET_FILE);
   }*/
+  //eraseFlashCompletely();
   //initializePresets();  // ricrea il file con il nuovo layout e valori di default*/
  // SerialFlash.remove(PRESET_FILE);
  // erase_flash_log();
@@ -745,7 +746,7 @@ void setup() {
   
   bool profilo_attivo = true;  // cerco il profilo preferito in flash
   int i = 0;
-  while (profilo_attivo){ 
+  while (profilo_attivo && i < MAX_PRESETS){ 
    
     if (storage.presets[i].record.activ==true) {
     driveAmount = storage.presets[i].record.drive_Mount;
@@ -754,7 +755,7 @@ void setup() {
     toneFreq = storage.presets[i].record.tone_Freq;
     currentPreset = storage.presets[i].record.current_Preset;
     profilo_attivo=false;
-    loadPreset(currentPreset);
+    //loadPreset(i, storage.presets[i].record);
     activePreset = i;
     autoCalibEnabled = storage.autoCalibEnabled;
     Level = storage.savedLineLevel;
@@ -908,7 +909,7 @@ void loop() {
   handleEncoder();
   handleButtons();
   if (Adjust_Level == false) {
-  if ((needWaveshapeRegen && millis() - lastWaveshapeCheck > 200)&&(calib_finish)&&(bypassEnabled==false)) {
+  if ((needWaveshapeRegen && millis() - lastWaveshapeCheck > 50)&&(calib_finish)&&(bypassEnabled==false)) {
     lastWaveshapeCheck = millis();
     needWaveshapeRegen = false;
     //Serial.println("Regenerating waveshape...");

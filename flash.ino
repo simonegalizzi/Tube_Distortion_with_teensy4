@@ -107,7 +107,12 @@ bool saveAllPresets() {
   storage.magic = FLASH_MAGIC;
   storage.currentPreset = activePreset;
   storage.autoCalibEnabled = autoCalibEnabled;
-  storage.savedLineLevel = Level; 
+  storage.savedLineLevel = Level;
+
+  file.erase();              // cancella solo i settori di QUESTO file, non tutto il chip
+  while (!SerialFlash.ready()) delay(1);
+
+  file.seek(0);
   file.write(&storage, sizeof(PresetStorage));
   file.close();
 
@@ -333,6 +338,30 @@ void showPresetDetails(int index) {
 // Ottieni il preset corrente
 MeasurementRecord getCurrentPreset() {
   return storage.presets[activePreset].record;
+}
+void eraseFlashCompletely() {
+  if (!SerialFlash.begin(FLASH_CS_PIN)) {
+    Serial.println("Errore: flash non inizializzata");
+    return;
+  }
+
+  Serial.println("Cancellazione flash in corso, attendere...");
+  unsigned long start = millis();
+
+  SerialFlash.eraseAll();
+
+  // eraseAll() è asincrona: bisogna aspettare che il chip torni pronto
+  while (!SerialFlash.ready()) {
+    // lampeggia un LED o stampa un punto ogni tanto per sapere che non si è bloccato
+    if ((millis() - start) % 1000 == 0) {
+      Serial.print(".");
+      delay(1); // evita stampe multiple nello stesso ms
+    }
+  }
+
+  Serial.print("\nFlash cancellata in ");
+  Serial.print((millis() - start) / 1000);
+  Serial.println(" secondi");
 }
 /*
 void erase_flash_log() {

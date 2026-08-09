@@ -75,7 +75,7 @@ void drawEditVolume() {
   display.display();
 }
 
-void drawEditDrive() {
+/*void drawEditDrive() {
   display.clearDisplay();
   display.setTextSize(1);
   display.setTextColor(SH110X_WHITE);
@@ -98,6 +98,32 @@ void drawEditDrive() {
   else if (driveAmount < 2.0f) display.print("Crunch");
   else if (driveAmount < 3.0f) display.print("Overdrive");
   else display.print("Heavy");
+  
+  display.display();
+}*/
+void drawEditDrive() {
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setTextColor(SH110X_WHITE);
+  
+  display.setCursor(0, 0);
+  display.println("DRIVE");
+  display.drawLine(0, 10, 128, 10, SH110X_WHITE);
+  
+  display.setTextSize(2);
+  display.setCursor(10, 20);
+  display.print(driveAmount, 2);
+  
+  display.setTextSize(1);
+  int barWidth = (int)((driveAmount / 0.55f) * 110);   // era /5.0f
+  display.drawRect(5, 42, 118, 10, SH110X_WHITE);
+  display.fillRect(6, 43, barWidth, 8, SH110X_WHITE);
+  
+  display.setCursor(5, 54);
+  if (driveAmount < 0.15f) display.print("<1%");
+  else if (driveAmount < 0.28f) display.print(">1%");
+  else if (driveAmount < 0.41f) display.print(">1.6%");
+  else display.print(">2.3%");
   
   display.display();
 }
